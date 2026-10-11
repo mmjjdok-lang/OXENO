@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VOXENO - Secure Key System</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: #0b0f19;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        /* Background Glow Effect */
+        body::before {
+            content: '';
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: rgba(139, 0, 0, 0.15);
+            filter: blur(120px);
+            z-index: -1;
+            top: 10%;
+            left: 20%;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+            background: rgba(17, 24, 39, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 40px 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            text-align: center;
+            transition: all 0.4s ease;
+        }
+
+        .header h1 {
+            font-size: 26px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #ff416c, #ff4b2b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 0.5px;
+        }
+
+        .header p {
+            font-size: 13px;
+            color: #9ca3af;
+            margin-bottom: 30px;
+        }
+
+        /* Buttons Grid */
+        .tasks-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .task-btn {
+            position: relative;
+            width: 100%;
+            padding: 16px 20px;
+            background: rgba(31, 41, 55, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .task-btn:hover:not(:disabled) {
+            background: rgba(55, 65, 81, 0.9);
+            border-color: rgba(255, 65, 108, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 65, 108, 0.15);
+        }
+
+        .task-btn:disabled {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: rgba(16, 185, 129, 0.3);
+            color: #10b981;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .task-btn i {
+            font-size: 16px;
+            color: #9ca3af;
+            transition: color 0.3s;
+        }
+
+        .task-btn:disabled i {
+            color: #10b981;
+        }
+
+        /* Progress Bar inside button during countdown */
+        .progress-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #ff416c, #ff4b2b);
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+
+        /* Start Button */
+        .start-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+            display: none;
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        .start-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        /* Page 2: Key Container */
+        .key-page {
+            display: none;
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        .key-box-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            background: rgba(31, 41, 55, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 6px;
+            margin: 25px 0;
+        }
+
+        .key-input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #10b981;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 10px 15px;
+            letter-spacing: 0.5px;
+        }
+
+        .copy-btn {
+            background: linear-gradient(135deg, #ff416c, #ff4b2b);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            padding: 10px 18px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+
+        .copy-btn:hover {
+            opacity: 0.9;
+            transform: scale(1.02);
+        }
+
+        .success-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 20px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container" id="mainContainer">
+        <!-- PAGE 1: TASKS -->
+        <div id="page1">
+            <div class="header">
+                <h1>Verification Required</h1>
+                <p>Complete all 4 steps below to unlock your script access.</p>
+            </div>
+
+            <div class="tasks-container">
+                <button class="task-btn" onclick="handleTask(0, 'https://youtube.com')">
+                    <span><i class="fab fa-youtube" style="margin-right: 10px; color: #ff0000;"></i> Subscribe to YouTube Channel</span>
+                    <i class="fa-solid fa-chevron-right arrow-icon"></i>
+                    <div class="progress-bar"></div>
+                </button>
+
+                <button class="task-btn" onclick="handleTask(1, 'https://discord.com')">
+                    <span><i class="fab fa-discord" style="margin-right: 10px; color: #5865F2;"></i> Join Discord Server</span>
+                    <i class="fa-solid fa-chevron-right arrow-icon"></i>
+                    <div class="progress-bar"></div>
+                </button>
+
+                <button class="task-btn" onclick="handleTask(2, 'https://twitter.com')">
+                    <span><i class="fab fa-twitter" style="margin-right: 10px; color: #1DA1F2;"></i> Follow on Twitter</span>
+                    <i class="fa-solid fa-chevron-right arrow-icon"></i>
+                    <div class="progress-bar"></div>
+                </button>
+
+                <button class="task-btn" onclick="handleTask(3, 'https://github.com')">
+                    <span><i class="fab fa-github" style="margin-right: 10px; color: #ffffff;"></i> Star GitHub Repository</span>
+                    <i class="fa-solid fa-chevron-right arrow-icon"></i>
+                    <div class="progress-bar"></div>
+                </button>
+            </div>
+
+            <button class="start-btn" id="startBtn" onclick="goToKeyPage()">
+                <i class="fa-solid fa-rocket" style="margin-right: 8px;"></i> START
+            </button>
+        </div>
+
+        <!-- PAGE 2: SCRIPT KEY -->
+        <div id="page2" class="key-page">
+            <div class="success-badge">
+                <i class="fa-solid fa-circle-check"></i> All Tasks Verified Successfully!
+            </div>
+            <div class="header">
+                <h1>Your Secure Script</h1>
+                <p>Copy your keyless script below and paste it into your executor.</p>
+            </div>
+
+            <div class="key-box-wrapper">
+                <input type="text" class="key-input" id="scriptKeyInput" value="FREE-KEYLESS-SCRIPT13028#VOXENO" readonly>
+                <button class="copy-btn" onclick="copyScript()">
+                    <i class="fa-regular fa-copy"></i> Copy
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const completedTasks = [false, false, false, false];
+        const buttons = document.querySelectorAll('.task-btn');
+        const startBtn = document.getElementById('startBtn');
+
+        function handleTask(index, url) {
+            if (completedTasks[index]) return; // منع تكرار المهمة إذا أكملها مسبقاً
+
+            const btn = buttons[index];
+            const progressBar = btn.querySelector('.progress-bar');
+            const spanText = btn.querySelector('span');
+            const icon = btn.querySelector('.arrow-icon');
+
+            // فتح رابط المهمة في نافذة جديدة
+            window.open(url, '_blank');
+
+            // تعطيل الزر مؤقتاً أثناء العد التنازلي
+            btn.disabled = true;
+            let timeLeft = 10;
+            spanText.innerHTML = `<i class="fa-solid fa-clock" style="margin-right: 10px; color: #ff4b2b;"></i> Wait (${timeLeft}s)...`;
+            icon.style.display = 'none';
+
+            let startTime = Date.now();
+            let duration = 10000; // 10 ثواني
+
+            let timer = setInterval(() => {
+                let elapsed = Date.now() - startTime;
+                let progressPercent = (elapsed / duration) * 100;
+                
+                if (progressPercent >= 100) {
+                    progressPercent = 100;
+                }
+                progressBar.style.width = progressPercent + '%';
+
+                let remaining = Math.ceil((duration - elapsed) / 1000);
+                if (remaining > 0) {
+                    spanText.innerHTML = `<i class="fa-solid fa-clock" style="margin-right: 10px; color: #ff4b2b;"></i> Wait (${remaining}s)...`;
+                } else {
+                    clearInterval(timer);
+                    progressBar.style.width = '0%';
+                    
+                    // تحديث حالة الزر بعد انتهاء العد التنازلي (مكتمل نهائياً)
+                    completedTasks[index] = true;
+                    btn.disabled = true; // يبقى معطلاً لكي لا يُكرر
+                    spanText.innerHTML = `<i class="fa-solid fa-check" style="margin-right: 10px; color: #10b981;"></i> Task Completed`;
+                    
+                    checkAllTasks();
+                }
+            }, 100);
+        }
+
+        function checkAllTasks() {
+            if (completedTasks.every(status => status === true)) {
+                startBtn.style.display = 'block';
+            }
+        }
+
+        function goToKeyPage() {
+            document.getElementById('page1').style.display = 'none';
+            document.getElementById('page2').style.display = 'block';
+        }
+
+        function copyScript() {
+            const inputField = document.getElementById('scriptKeyInput');
+            inputField.select();
+            inputField.setSelectionRange(0, 99999); // للأجهزة المحمولة
+            navigator.clipboard.writeText(inputField.value);
+
+            const copyBtn = document.querySelector('.copy-btn');
+            copyBtn.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
+            copyBtn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+
+            setTimeout(() => {
+                copyBtn.innerHTML = '<i class="fa-regular fa-copy"></i> Copy';
+                copyBtn.style.background = 'linear-gradient(135deg, #ff416c, #ff4b2b)';
+            }, 2500);
+        }
+    </script>
+</body>
+</html>
